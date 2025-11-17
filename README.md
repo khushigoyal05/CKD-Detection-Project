@@ -144,15 +144,3 @@ GitHub: [@khushigoyal05](https://github.com/khushigoyal05)
 GitHub: [@shambhavi-coder](https://github.com/shambhavi-coder)
 
 ---
-
-# 🎉 You can now commit & push the updated README
-
-```
-git add README.md
-git commit -m "Updated README with UI screenshots and details"
-git push
-```
-
----
-✅ Create a **Deployment version for Streamlit Cloud / HuggingFace**
-Just tell me!
