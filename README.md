@@ -1,61 +1,56 @@
-🚑 Early Detection of Chronic Kidney Disease (CKD)
 
-A Machine Learning–powered web application that predicts the likelihood of Chronic Kidney Disease (CKD) based on patient medical parameters.
+## 🚑 Early Detection of Chronic Kidney Disease (CKD)
+
+A **Machine Learning–powered web application** that predicts the likelihood of **Chronic Kidney Disease (CKD)** based on patient medical parameters.
 The project includes:
 
-✔ Data preprocessing
+* ✔ Data preprocessing
+* ✔ Exploratory Data Analysis (EDA)
+* ✔ Multiple ML models comparison
+* ✔ Best model selection
+* ✔ An interactive **Streamlit UI**
+* ✔ Multi-page web app (Home, EDA, Model Performance, About)
 
-✔ Exploratory Data Analysis (EDA)
+---
 
-✔ Multiple ML models comparison
-
-✔ Best model selection
-
-✔ An interactive Streamlit UI
-
-✔ Multi-page web app (Home, EDA, Model Performance, About)
-
-🌐 Live Demo (Optional)
+## 🌐 Live Demo (Optional)
 
 Add link here after deployment:
-👉 Coming Soon
+**👉 *Coming Soon***
 
-📊 Features
-🔹 1. User-friendly Web Interface
+---
 
-Numeric & categorical medical inputs
+## 📊 Features
 
-Automatic preprocessing
+### 🔹 1. **User-friendly Web Interface**
 
-Real-time CKD prediction
+* Numeric & categorical medical inputs
+* Automatic preprocessing
+* Real-time CKD prediction
 
-🔹 2. EDA Dashboard
+### 🔹 2. **EDA Dashboard**
 
-Dataset preview
+* Dataset preview
+* Missing value visualization
+* Normalized numerical data
+* Summary statistics
 
-Missing value visualization
+### 🔹 3. **Model Performance Comparison**
 
-Normalized numerical data
+* Logistic Regression
+* KNN
+* Decision Tree
+* Random Forest
+* SVM
+* Gradient Boosting
 
-Summary statistics
+SVM achieved **100% accuracy**, but Logistic Regression selected as best generalizable model.
 
-🔹 3. Model Performance Comparison
+---
 
-Logistic Regression
+## 📁 Project Structure
 
-KNN
-
-Decision Tree
-
-Random Forest
-
-SVM
-
-Gradient Boosting
-
-SVM achieved 100% accuracy, but Logistic Regression selected as best generalizable model.
-
-📁 Project Structure
+```
 CKD_Detection_Project/
 │── app.py
 │── preprocess_data.py
@@ -70,66 +65,94 @@ CKD_Detection_Project/
 │     ├── EDA.py
 │     ├── Model_Performance.py
 │     └── About.py
+```
 
-🚀 How to Run Locally
-1️⃣ Create virtual environment
+---
+
+## 🚀 How to Run Locally
+
+### 1️⃣ Create virtual environment
+
+```
 python -m venv venv
+```
 
-2️⃣ Activate it
+### 2️⃣ Activate it
+
+```
 venv\Scripts\activate
+```
 
-3️⃣ Install dependencies
+### 3️⃣ Install dependencies
+
+```
 pip install -r requirements.txt
+```
 
-4️⃣ Run Streamlit app
+### 4️⃣ Run Streamlit app
+
+```
 streamlit run app.py
+```
 
-🧠 Machine Learning Pipeline
+---
 
-Preprocessing
+## 🧠 Machine Learning Pipeline
 
-Missing value imputation
+1. **Preprocessing**
 
-Encoding categorical columns
+   * Missing value imputation
+   * Encoding categorical columns
+   * Normalization
+   * Saving preprocessing objects (scaler, encoder)
 
-Normalization
+2. **Model Training**
 
-Saving preprocessing objects (scaler, encoder)
+   * Trains 6 models
+   * Calculates accuracy, precision, recall, F1, AUC
+   * Saves best model → `models/best_model.pkl`
 
-Model Training
+3. **Inference**
 
-Trains 6 models
+   * User inputs → preprocessing → model predicts CKD / Not CKD
 
-Calculates accuracy, precision, recall, F1, AUC
+---
 
-Saves best model → models/best_model.pkl
+## 📦 Tech Stack
 
-Inference
+* **Python**
+* **Pandas, NumPy**
+* **Scikit-learn**
+* **Streamlit**
+* **Pickle**
+* **Matplotlib / Seaborn**
 
-User inputs → preprocessing → model predicts CKD / Not CKD
+---
 
-📦 Tech Stack
+## 📜 Dataset
 
-Python
+The model is trained on the **Chronic Kidney Disease dataset (UCI Repository)** with 400 samples & 25 medical attributes.
 
-Pandas, NumPy
+---
 
-Scikit-learn
+## 🙋‍♀️ Author
 
-Streamlit
+**Khushi Goyal**
+GitHub: [@khushigoyal05](https://github.com/khushigoyal05)
 
-Pickle
+**Shambhavi**
+GitHub: [@shambhavi-coder](https://github.com/shambhavi-coder)
 
-Matplotlib / Seaborn
+---
 
-📜 Dataset
+# 🎉 You can now commit & push the updated README
 
-The model is trained on the Chronic Kidney Disease dataset (UCI Repository) with 400 samples & 25 medical attributes.
+```
+git add README.md
+git commit -m "Updated README with UI screenshots and details"
+git push
+```
 
-🙋‍♀️ Author
-
-Khushi Goyal
-GitHub: @khushigoyal05
-
-Shambhavi
-GitHub: @shambhavi-coder
+---
+✅ Create a **Deployment version for Streamlit Cloud / HuggingFace**
+Just tell me!
