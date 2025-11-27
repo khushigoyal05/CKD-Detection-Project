@@ -1,75 +1,72 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.svm import SVC
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import cross_val_predict, StratifiedKFold
+from sklearn.metrics import accuracy_score, roc_auc_score, classification_report, confusion_matrix
+from imblearn.over_sampling import SMOTE
 import joblib
 
-# Load cleaned dataset
-df = pd.read_csv("data/ckd_cleaned.csv")
+print("\n📂 Loading dataset...")
+df = pd.read_csv("data/ckd_data.csv")
 
-# Split into features and target
-X = df.drop("class", axis=1)
+# ------------------------- CLEANING -------------------------
+
+df["class"] = df["class"].replace({"no": "notckd"})
+df = df[df["class"].isin(["ckd", "notckd"])]   # remove 1 outlier sample
+
+num_cols = ["age","bp","sg","al","su","bgr","bu","sc","sod","pot","hemo","pcv","wbcc","rbcc"]
+cat_cols = ["rbc","pc","pcc","ba","htn","dm","cad","appet","pe","ane"]
+
+# Convert numbers safely
+for col in num_cols:
+    df[col] = pd.to_numeric(df[col], errors="coerce")
+
+df[num_cols] = df[num_cols].fillna(df[num_cols].median())
+for col in cat_cols:
+    df[col] = df[col].fillna("unknown")
+
+df["class"] = df["class"].map({"ckd":1,"notckd":0})
+
+# ------------------------- ENCODE NOW (before SMOTE) -------------------------
+
+encoder = OneHotEncoder(handle_unknown="ignore")
+X_encoded = encoder.fit_transform(df[cat_cols]).toarray()
+
+X = np.concatenate([df[num_cols], X_encoded], axis=1)  # numerical + encoded categorical
 y = df["class"]
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+# ------------------------- APPLY SMOTE -------------------------
 
-models = {
-    "Logistic Regression": LogisticRegression(max_iter=1000),
-    "KNN": KNeighborsClassifier(),
-    "Decision Tree": DecisionTreeClassifier(),
-    "Random Forest": RandomForestClassifier(),
-    "SVM": SVC(probability=True),
-    "Gradient Boosting": GradientBoostingClassifier()
-}
+print("\n⚖ Balancing dataset with SMOTE...")
+X_resampled, y_resampled = SMOTE(random_state=42).fit_resample(X, y)
 
-results = []
+# ------------------------- MODEL -------------------------
 
-print("\n===== TRAINING MODELS =====\n")
+base_model = LogisticRegression(max_iter=300, C=0.6)  # reduce overconfident fit
+model = CalibratedClassifierCV(base_model, cv=5, method="isotonic")
 
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)[:, 1]
+print("\n🚀 Training CKD Model using 5-fold CV...")
+model.fit(X_resampled, y_resampled)
 
-    acc = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred)
-    rec = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
-    auc = roc_auc_score(y_test, y_prob)
+# CV Probabilities for realistic evaluation
+cv_pred = cross_val_predict(model, X_resampled, y_resampled, cv=5, method="predict_proba")[:,1]
+cv_class = (cv_pred > 0.5).astype(int)
 
-    results.append([name, acc, prec, rec, f1, auc])
+print("\n===== PERFORMANCE =====")
+print("Accuracy:", round(accuracy_score(y_resampled, cv_class),4))
+print("AUC:", round(roc_auc_score(y_resampled, cv_pred),4))
+print("\nConfusion Matrix:\n", confusion_matrix(y_resampled, cv_class))
+print("\nClassification Report:\n", classification_report(y_resampled, cv_class))
 
-    print(f"{name}")
-    print(f"Accuracy: {acc:.4f}")
-    print(f"Precision: {prec:.4f}")
-    print(f"Recall (Sensitivity): {rec:.4f}")
-    print(f"F1 Score: {f1:.4f}")
-    print(f"AUC: {auc:.4f}")
-    print("-" * 40)
+# ------------------------- SAVE MODEL + ENCODER -------------------------
 
-# Convert results to DataFrame for readability
-results_df = pd.DataFrame(
-    results,
-    columns=["Model", "Accuracy", "Precision", "Recall", "F1 Score", "AUC"]
-)
+joblib.dump(model, "models/best_model.pkl")
+joblib.dump({"onehot": encoder, "num_cols":num_cols, "cat_cols":cat_cols},
+            "models/preprocessing.pkl")
 
-print("\n===== MODEL PERFORMANCE =====")
-print(results_df)
-
-# Pick best based on highest AUC
-best_model_name = results_df.sort_values(by="AUC", ascending=False).iloc[0]["Model"]
-best_model = models[best_model_name]
-
-# Save best model
-joblib.dump(best_model, "models/best_model.pkl")
-
-print(f"\n🎉 Best model: {best_model_name}")
-print("✔ Saved as models/best_model.pkl")
+print("\n🎉 Model + preprocessors saved successfully!\n")
+print("➡ Now run:  streamlit run app.py\n")
